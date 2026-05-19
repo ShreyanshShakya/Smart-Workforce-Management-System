@@ -61,6 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String email = jwtService.extractEmail(token);
 
         String role = jwtService.extractRole(token);
+        System.out.println("ROLE FROM JWT: " + role);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
@@ -80,5 +81,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
+        System.out.println(authentication.getAuthorities());
     }
 }
