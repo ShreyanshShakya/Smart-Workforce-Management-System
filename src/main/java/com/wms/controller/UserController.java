@@ -30,4 +30,10 @@ public class UserController {
 
         return userService.getAllUsers();
     }
+    @GetMapping("/protected")
+
+    public String protectedRoute() {
+
+        return "Access granted to protected route";
+    }
 }
