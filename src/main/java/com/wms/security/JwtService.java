@@ -22,16 +22,28 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String email, String role) {
 
         return Jwts.builder()
                 .subject(email)
+
+                .claim("role", role)
+
                 .issuedAt(new Date())
+
                 .expiration(
                         new Date(System.currentTimeMillis() + 1000 * 60 * 60)
                 )
+
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+
                 .compact();
+    }
+
+    public String extractRole(String token) {
+
+        return extractClaims(token)
+                .get("role", String.class);
     }
 
     public String extractEmail(String token) {

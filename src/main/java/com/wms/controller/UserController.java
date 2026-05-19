@@ -25,6 +25,13 @@ public class UserController {
         return userService.createUser(requestDTO);
     }
 
+    @GetMapping("/admin")
+
+    public String adminRoute() {
+
+        return "Welcome Admin";
+    }
+
     @GetMapping
     public List<UserResponseDTO> getAllUsers() {
 
