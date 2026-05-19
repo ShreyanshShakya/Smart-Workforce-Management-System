@@ -1,5 +1,7 @@
 package com.wms.service;
 
+import com.wms.dto.UserRequestDTO;
+import com.wms.dto.UserResponseDTO;
 import com.wms.entity.User;
 import com.wms.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -16,14 +18,37 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User createUser(User user) {
+    public UserResponseDTO createUser(UserRequestDTO requestDTO) {
 
-        user.setCreatedAt(LocalDateTime.now());
+        User user = User.builder()
+                .name(requestDTO.getName())
+                .email(requestDTO.getEmail())
+                .password(requestDTO.getPassword())
+                .role(requestDTO.getRole())
+                .createdAt(LocalDateTime.now())
+                .build();
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDTO> getAllUsers() {
+
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private UserResponseDTO mapToResponse(User user) {
+
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .build();
     }
 }

@@ -1,7 +1,9 @@
 package com.wms.controller;
 
-import com.wms.entity.User;
+import com.wms.dto.UserRequestDTO;
+import com.wms.dto.UserResponseDTO;
 import com.wms.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,12 +20,14 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    public UserResponseDTO createUser(@Valid @RequestBody UserRequestDTO requestDTO) {
+
+        return userService.createUser(requestDTO);
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserResponseDTO> getAllUsers() {
+
         return userService.getAllUsers();
     }
 }
