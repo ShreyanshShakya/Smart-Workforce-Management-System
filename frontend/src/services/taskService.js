@@ -65,4 +65,14 @@ export const getTasksByStatus = async (status) => {
 export const getTasksByPriority = async (priority) => {
     const response = await api.get(`/tasks/priority/${priority}`);
     return response.data;
+};
+
+export const getAnalytics = async () => {
+    const response = await api.get("/tasks/analytics");
+    return response.data;
+};
+
+export const getMyAnalytics = async () => {
+    const response = await api.get("/tasks/analytics/me");
+    return response.data;
 };

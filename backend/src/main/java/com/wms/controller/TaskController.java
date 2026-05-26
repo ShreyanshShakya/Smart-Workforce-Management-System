@@ -3,6 +3,7 @@ package com.wms.controller;
 import com.wms.dto.TaskRequestDTO;
 import com.wms.dto.TaskResponseDTO;
 import com.wms.dto.TaskStatusUpdateDTO;
+import com.wms.dto.TaskAnalyticsDTO;
 import com.wms.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -116,5 +117,16 @@ public class TaskController {
                 sortBy,
                 direction
         );
+    }
+
+    @GetMapping("/analytics")
+    public TaskAnalyticsDTO getAnalytics() {
+        return taskService.getAnalytics();
+    }
+
+    @GetMapping("/analytics/me")
+    public TaskAnalyticsDTO getMyAnalytics(Authentication authentication) {
+        String email = authentication.getName();
+        return taskService.getMyAnalytics(email);
     }
 }

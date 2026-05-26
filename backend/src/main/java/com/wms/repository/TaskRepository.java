@@ -29,6 +29,13 @@ public interface TaskRepository
 
     List<Task> findByDeadlineBefore(LocalDate date);
 
+    long countByStatus(TaskStatus status);
+    long countByDeadlineBeforeAndStatusNot(LocalDate date, TaskStatus status);
+    
+    long countByAssignedTo(User user);
+    long countByAssignedToAndStatus(User user, TaskStatus status);
+    long countByAssignedToAndDeadlineBeforeAndStatusNot(User user, LocalDate date, TaskStatus status);
+
     Page<Task> findAll(Pageable pageable);
 }
 

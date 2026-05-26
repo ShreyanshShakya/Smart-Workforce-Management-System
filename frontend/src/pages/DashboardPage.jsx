@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import AnalyticsCards from '../components/AnalyticsCards';
 import CreateTaskForm from '../components/CreateTaskForm';
 import TaskTable from '../components/TaskTable';
-import { getMyTasks, getOverdueTasks } from '../services/taskService';
+import { getMyTasks, getAllTasks } from '../services/taskService';
 import webSocketService from '../services/websocketService';
 
 export default function DashboardPage() {
@@ -18,9 +18,9 @@ export default function DashboardPage() {
         // Prevent synchronous state update inside effect
         try {
             if (isAdminOrManager) {
-                // Fetch preview tasks (e.g. overdue tasks)
-                const res = await getOverdueTasks();
-                setTasks(Array.isArray(res) ? res.slice(0, 5) : []); 
+                // Fetch preview tasks (recent tasks)
+                const res = await getAllTasks(0, 5, 'createdAt', 'desc');
+                setTasks(res.content || []); 
             } else {
                 const res = await getMyTasks();
                 setTasks(res || []);
@@ -93,7 +93,7 @@ export default function DashboardPage() {
             <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden">
                 <div className="p-6 border-b border-slate-700/50 flex justify-between items-center">
                     <h2 className="text-lg font-semibold text-white">
-                        {isAdminOrManager ? 'Overdue Tasks Preview' : 'My Recent Tasks'}
+                        {isAdminOrManager ? 'Recent Tasks' : 'My Recent Tasks'}
                     </h2>
                 </div>
                 <div className="p-6">

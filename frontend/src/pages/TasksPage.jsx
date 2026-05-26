@@ -3,6 +3,7 @@ import TaskTable from '../components/TaskTable';
 import { getAllTasks } from '../services/taskService';
 import { useAuth } from '../context/AuthContext';
 import webSocketService from '../services/websocketService';
+import Pagination from '../components/Pagination';
 
 export default function TasksPage() {
     const { user } = useAuth();
@@ -11,12 +12,14 @@ export default function TasksPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [sortBy, setSortBy] = useState('deadline');
+    const [direction, setDirection] = useState('asc');
 
     const fetchTasks = async () => {
         setLoading(true);
         setError('');
         try {
-            const res = await getAllTasks(page, 10, 'deadline', 'asc');
+            const res = await getAllTasks(page, 10, sortBy, direction);
             setTasks(res.content || []);
             setTotalPages(res.totalPages || 1);
         } catch (err) {
@@ -29,7 +32,7 @@ export default function TasksPage() {
 
     useEffect(() => {
         fetchTasks();
-    }, [page]);
+    }, [page, sortBy, direction]);
 
     useEffect(() => {
         webSocketService.connect(() => {
@@ -59,9 +62,33 @@ export default function TasksPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold text-white">All Tasks</h1>
-                <p className="text-slate-400 text-sm mt-1">Manage and track all workforce tasks</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-white">All Tasks</h1>
+                    <p className="text-slate-400 text-sm mt-1">Manage and track all workforce tasks</p>
+                </div>
+                
+                <div className="flex gap-2">
+                    <select 
+                        value={sortBy} 
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="bg-slate-800 text-slate-300 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                        <option value="deadline">Sort by Deadline</option>
+                        <option value="createdAt">Sort by Creation Date</option>
+                        <option value="priority">Sort by Priority</option>
+                        <option value="status">Sort by Status</option>
+                    </select>
+                    
+                    <select 
+                        value={direction} 
+                        onChange={(e) => setDirection(e.target.value)}
+                        className="bg-slate-800 text-slate-300 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </div>
             </div>
 
             {error && (
@@ -85,25 +112,7 @@ export default function TasksPage() {
                 </div>
 
                 {!loading && tasks.length > 0 && (
-                    <div className="px-6 py-4 border-t border-slate-700/50 flex items-center justify-between bg-slate-800/30">
-                        <button
-                            onClick={() => setPage(Math.max(0, page - 1))}
-                            disabled={page === 0}
-                            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Previous
-                        </button>
-                        <span className="text-sm text-slate-400">
-                            Page {page + 1} of {totalPages}
-                        </span>
-                        <button
-                            onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-                            disabled={page >= totalPages - 1}
-                            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Next
-                        </button>
-                    </div>
+                    <Pagination page={page} totalPages={totalPages} setPage={setPage} />
                 )}
             </div>
         </div>

@@ -19,6 +19,49 @@ Built with a robust **Spring Boot** backend and a beautiful, modern **React (Vit
 
 ---
 
+## 📸 Screenshots
+
+*(Replace these placeholders with actual screenshots of your running application)*
+
+| Dashboard (Dark Mode) | Task Management |
+| :---: | :---: |
+| ![Dashboard Placeholder](https://via.placeholder.com/600x400/0f172a/cbd5e1?text=Dashboard+Screenshot) | ![Tasks Placeholder](https://via.placeholder.com/600x400/0f172a/cbd5e1?text=Task+Table+Screenshot) |
+
+---
+
+## 🏗️ Architecture & API Flow
+
+```mermaid
+graph TD
+    Client[React Frontend Vite]
+    Nginx[Nginx Reverse Proxy]
+    API[Spring Boot REST API]
+    WS[Spring WebSockets STOMP]
+    DB[(MySQL 8 Database)]
+
+    Client -->|HTTP GET/POST| Nginx
+    Client -->|ws:// Upgrade| Nginx
+    
+    Nginx -->|Proxy /api| API
+    Nginx -->|Proxy /ws| WS
+    
+    API -->|JPA / Hibernate| DB
+    WS -->|JPA / Hibernate| DB
+    
+    API -.->|Broadcasts Updates| WS
+    WS -.->|Pushes to Clients| Client
+```
+
+### Flow Example: Creating a Task
+1. Manager submits form on React Frontend.
+2. Axios sends `POST /api/tasks` with JWT Bearer Token.
+3. Spring Security validates the JWT in `JwtAuthenticationFilter`.
+4. `TaskController` processes the request and saves to MySQL via `TaskRepository`.
+5. `TaskService` broadcasts the new task object to `/topic/tasks` via `SimpMessagingTemplate`.
+6. Connected employees immediately see the new task appear via their WebSocket subscription.
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Frontend

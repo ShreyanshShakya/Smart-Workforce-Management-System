@@ -2,6 +2,7 @@ package com.wms.service;
 
 import com.wms.dto.TaskRequestDTO;
 import com.wms.dto.TaskResponseDTO;
+import com.wms.dto.TaskAnalyticsDTO;
 import com.wms.entity.Task;
 import com.wms.entity.TaskStatus;
 import com.wms.entity.User;
@@ -181,5 +182,38 @@ public class TaskService {
 
         return taskRepository.findAll(pageable)
                 .map(this::mapToResponse);
+    }
+
+    public TaskAnalyticsDTO getAnalytics() {
+        long total = taskRepository.count();
+        long completed = taskRepository.countByStatus(TaskStatus.COMPLETED);
+        long overdue = taskRepository.countByDeadlineBeforeAndStatusNot(
+                java.time.LocalDate.now(), TaskStatus.COMPLETED);
+        long pending = total - completed; // Or pending + in_progress
+
+        return TaskAnalyticsDTO.builder()
+                .totalTasks(total)
+                .completedTasks(completed)
+                .overdueTasks(overdue)
+                .pendingTasks(pending)
+                .build();
+    }
+
+    public TaskAnalyticsDTO getMyAnalytics(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        long total = taskRepository.countByAssignedTo(user);
+        long completed = taskRepository.countByAssignedToAndStatus(user, TaskStatus.COMPLETED);
+        long overdue = taskRepository.countByAssignedToAndDeadlineBeforeAndStatusNot(
+                user, java.time.LocalDate.now(), TaskStatus.COMPLETED);
+        long pending = total - completed;
+
+        return TaskAnalyticsDTO.builder()
+                .totalTasks(total)
+                .completedTasks(completed)
+                .overdueTasks(overdue)
+                .pendingTasks(pending)
+                .build();
     }
 }
