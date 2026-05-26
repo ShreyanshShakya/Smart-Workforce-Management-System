@@ -71,8 +71,11 @@ public class SecurityConfig {
                          * USER APIs
                          */
 
-                        .requestMatchers("/api/users")
-                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users")
+                        .hasRole("ADMIN")
+                        
+                        .requestMatchers(HttpMethod.GET, "/api/users")
+                        .hasAnyRole("ADMIN", "MANAGER")
 
                         .requestMatchers("/api/users/protected")
                         .authenticated()

@@ -8,8 +8,7 @@ export default function RegisterPage() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        password: '',
-        role: 'EMPLOYEE'
+        password: ''
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +22,7 @@ export default function RegisterPage() {
         setError('');
         setIsLoading(true);
         try {
-            await register(formData.name, formData.email, formData.password, formData.role);
+            await register(formData.name, formData.email, formData.password);
             navigate('/');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to register. Please try again.');
@@ -82,19 +81,6 @@ export default function RegisterPage() {
                             value={formData.password}
                             onChange={handleChange}
                         />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Role</label>
-                        <select
-                            name="role"
-                            value={formData.role}
-                            onChange={handleChange}
-                            className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-colors appearance-none"
-                        >
-                            <option value="EMPLOYEE">Employee</option>
-                            <option value="MANAGER">Manager</option>
-                            <option value="ADMIN">Admin</option>
-                        </select>
                     </div>
 
                     <button

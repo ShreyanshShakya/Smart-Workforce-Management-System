@@ -2,6 +2,8 @@ package com.wms.controller;
 
 import com.wms.dto.AuthResponseDTO;
 import com.wms.dto.LoginRequestDTO;
+import com.wms.dto.RegisterRequestDTO;
+import com.wms.dto.UserResponseDTO;
 import com.wms.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -24,5 +26,12 @@ public class AuthController {
     ) {
 
         return authService.login(requestDTO);
+    }
+
+    @PostMapping("/register")
+    public UserResponseDTO register(
+            @Valid @RequestBody RegisterRequestDTO requestDTO
+    ) {
+        return authService.register(requestDTO);
     }
 }
