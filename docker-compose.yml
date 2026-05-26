@@ -1,39 +1,39 @@
 version: '3.9'
 
 services:
-
   mysql:
-
     image: mysql:8.4
-
     container_name: wms-mysql
-
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wms
-
     ports:
       - "3307:3306"
-
     volumes:
       - mysql-data:/var/lib/mysql
 
   backend:
-
-    build: .
-
+    build: 
+      context: ./backend
     container_name: wms-backend
-
     depends_on:
       - mysql
-
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/wms
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
-
+      ALLOWED_ORIGINS: "*"
     ports:
       - "8081:8081"
+
+  frontend:
+    build: 
+      context: ./frontend
+    container_name: wms-frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
 
 volumes:
   mysql-data:

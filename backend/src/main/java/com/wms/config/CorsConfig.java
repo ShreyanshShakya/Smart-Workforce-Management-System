@@ -1,5 +1,6 @@
 package com.wms.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +15,9 @@ import java.util.List;
 
 public class CorsConfig {
 
+    @Value("${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:80,http://localhost}")
+    private String allowedOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
@@ -21,7 +25,7 @@ public class CorsConfig {
                 new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of(allowedOrigins.split(","))
         );
 
         configuration.setAllowedMethods(
