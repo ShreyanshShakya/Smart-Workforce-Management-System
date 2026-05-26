@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import TaskTable from '../components/TaskTable';
 import { getMyTasks } from '../services/taskService';
+import webSocketService from '../services/websocketService';
+import { useAuth } from '../context/AuthContext';
 
 export default function MyTasksPage() {
+    const { user } = useAuth();
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -24,6 +27,27 @@ export default function MyTasksPage() {
     useEffect(() => {
         fetchTasks();
     }, []);
+
+    useEffect(() => {
+        webSocketService.connect(() => {
+            webSocketService.subscribe('/topic/tasks', (updatedTask) => {
+                setTasks(prevTasks => {
+                    const exists = prevTasks.find(t => t.id === updatedTask.id);
+                    if (exists) {
+                        return prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+                    }
+                    if (updatedTask.assignedTo === user?.email) {
+                        return [updatedTask, ...prevTasks];
+                    }
+                    return prevTasks;
+                });
+            });
+        });
+
+        return () => {
+            webSocketService.unsubscribe('/topic/tasks');
+        };
+    }, [user?.email]);
 
     return (
         <div className="space-y-6">

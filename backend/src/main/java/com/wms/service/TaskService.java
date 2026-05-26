@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,14 +26,17 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public TaskService(
             TaskRepository taskRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            SimpMessagingTemplate messagingTemplate
     ) {
 
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     public TaskResponseDTO createTask(
@@ -63,8 +67,11 @@ public class TaskService {
                 .build();
 
         Task savedTask = taskRepository.save(task);
+        TaskResponseDTO responseDTO = mapToResponse(savedTask);
 
-        return mapToResponse(savedTask);
+        messagingTemplate.convertAndSend("/topic/tasks", responseDTO);
+
+        return responseDTO;
     }
 
     public List<TaskResponseDTO> getTasksForUser(String email) {
@@ -118,8 +125,11 @@ public class TaskService {
         task.setStatus(requestDTO.getStatus());
 
         Task updatedTask = taskRepository.save(task);
+        TaskResponseDTO responseDTO = mapToResponse(updatedTask);
 
-        return mapToResponse(updatedTask);
+        messagingTemplate.convertAndSend("/topic/tasks", responseDTO);
+
+        return responseDTO;
     }
 
     public List<TaskResponseDTO> getTasksByStatus(

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import TaskTable from '../components/TaskTable';
 import { getAllTasks } from '../services/taskService';
 import { useAuth } from '../context/AuthContext';
+import webSocketService from '../services/websocketService';
 
 export default function TasksPage() {
     const { user } = useAuth();
@@ -29,6 +30,24 @@ export default function TasksPage() {
     useEffect(() => {
         fetchTasks();
     }, [page]);
+
+    useEffect(() => {
+        webSocketService.connect(() => {
+            webSocketService.subscribe('/topic/tasks', (updatedTask) => {
+                setTasks(prevTasks => {
+                    const exists = prevTasks.find(t => t.id === updatedTask.id);
+                    if (exists) {
+                        return prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+                    }
+                    return [updatedTask, ...prevTasks];
+                });
+            });
+        });
+
+        return () => {
+            webSocketService.unsubscribe('/topic/tasks');
+        };
+    }, []);
 
     if (user?.role !== 'ADMIN' && user?.role !== 'MANAGER') {
         return (

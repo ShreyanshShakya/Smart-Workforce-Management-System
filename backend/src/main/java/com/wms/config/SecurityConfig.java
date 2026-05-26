@@ -53,7 +53,7 @@ public class SecurityConfig {
                          * PUBLIC AUTH APIs
                          */
 
-                        .requestMatchers("/api/auth/**")
+                        .requestMatchers("/api/auth/**", "/ws/**")
                         .permitAll()
 
                         /*

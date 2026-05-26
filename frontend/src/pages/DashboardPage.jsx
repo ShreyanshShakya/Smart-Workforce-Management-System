@@ -4,6 +4,7 @@ import AnalyticsCards from '../components/AnalyticsCards';
 import CreateTaskForm from '../components/CreateTaskForm';
 import TaskTable from '../components/TaskTable';
 import { getMyTasks, getOverdueTasks } from '../services/taskService';
+import webSocketService from '../services/websocketService';
 
 export default function DashboardPage() {
     const { user } = useAuth();
@@ -35,6 +36,28 @@ export default function DashboardPage() {
         setLoading(true);
         fetchTasks();
     }, [fetchTasks]);
+
+    useEffect(() => {
+        webSocketService.connect(() => {
+            webSocketService.subscribe('/topic/tasks', (updatedTask) => {
+                setTasks(prevTasks => {
+                    const exists = prevTasks.find(t => t.id === updatedTask.id);
+                    if (exists) {
+                        return prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+                    }
+                    // If employee and task is assigned to them, add to list
+                    if (!isAdminOrManager && updatedTask.assignedTo === user?.email) {
+                        return [updatedTask, ...prevTasks];
+                    }
+                    return prevTasks;
+                });
+            });
+        });
+
+        return () => {
+            webSocketService.unsubscribe('/topic/tasks');
+        };
+    }, [isAdminOrManager, user?.email]);
 
     const handleTaskCreated = () => {
         setShowCreateForm(false);
