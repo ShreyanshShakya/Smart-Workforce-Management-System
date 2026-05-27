@@ -3,12 +3,15 @@ import { useAuth } from '../context/AuthContext';
 import AnalyticsCards from '../components/AnalyticsCards';
 import CreateTaskForm from '../components/CreateTaskForm';
 import TaskTable from '../components/TaskTable';
-import { getMyTasks, getAllTasks } from '../services/taskService';
+import { getMyTasks, getAllTasks, getAnalytics, getMyAnalytics } from '../services/taskService';
 import webSocketService from '../services/websocketService';
+import TaskStatusPieChart from './charts/TaskStatusPieChart';
+import TaskTrendBarChart from './charts/TaskTrendBarChart';
 
 export default function DashboardPage() {
     const { user } = useAuth();
     const [tasks, setTasks] = useState([]);
+    const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showCreateForm, setShowCreateForm] = useState(false);
     
@@ -20,10 +23,14 @@ export default function DashboardPage() {
             if (isAdminOrManager) {
                 // Fetch preview tasks (recent tasks)
                 const res = await getAllTasks(0, 5, 'createdAt', 'desc');
-                setTasks(res.content || []); 
+                setTasks(res.content || []);
+                const stats = await getAnalytics();
+                setAnalytics(stats);
             } else {
                 const res = await getMyTasks();
                 setTasks(res || []);
+                const stats = await getMyAnalytics();
+                setAnalytics(stats);
             }
         } catch (error) {
             console.error("Failed to fetch tasks:", error);
@@ -40,17 +47,7 @@ export default function DashboardPage() {
     useEffect(() => {
         webSocketService.connect(() => {
             webSocketService.subscribe('/topic/tasks', (updatedTask) => {
-                setTasks(prevTasks => {
-                    const exists = prevTasks.find(t => t.id === updatedTask.id);
-                    if (exists) {
-                        return prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t);
-                    }
-                    // If employee and task is assigned to them, add to list
-                    if (!isAdminOrManager && updatedTask.assignedTo === user?.email) {
-                        return [updatedTask, ...prevTasks];
-                    }
-                    return prevTasks;
-                });
+                fetchTasks(); // Refetch to update analytics and tasks easily
             });
         });
 
@@ -81,7 +78,12 @@ export default function DashboardPage() {
                 )}
             </div>
 
-            <AnalyticsCards />
+            {analytics && <AnalyticsCards analytics={analytics} />}
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <TaskStatusPieChart analytics={analytics} />
+                <TaskTrendBarChart analytics={analytics} />
+            </div>
 
             {showCreateForm && isAdminOrManager && (
                 <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-6 shadow-xl">

@@ -1,33 +1,46 @@
-import { Outlet } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import { useAuth } from '../context/AuthContext';
+import { Outlet, useLocation } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 
-export default function DashboardLayout() {
-  const { user, logout } = useAuth();
+const DashboardLayout = () => {
+    const location = useLocation();
+    
+    const getPageTitle = () => {
+        switch (location.pathname) {
+            case '/dashboard': return 'Dashboard Overview';
+            case '/tasks': return 'All Tasks Management';
+            case '/my-tasks': return 'My Assigned Tasks';
+            case '/users': return 'Team Directory';
+            default: return 'Workforce Management';
+        }
+    };
 
-  return (
-    <div className="h-screen bg-slate-950 text-slate-300 overflow-hidden flex font-sans">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-slate-900/50 backdrop-blur-xl border-b border-slate-800/50 flex items-center justify-between px-6 shrink-0">
-          <h2 className="text-xl font-semibold text-white"></h2>
-          <div className="flex items-center gap-4">
-            <div className="text-sm">
-              <span className="text-slate-400">Welcome, </span>
-              <span className="font-medium text-white">{user?.email || 'User'}</span>
+    return (
+        <div className="h-screen w-screen bg-slate-950 text-slate-300 overflow-hidden flex font-sans antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
+            {/* Sidebar (Fixed on left) */}
+            <Sidebar />
+
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+                
+                {/* Background decorative elements */}
+                <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
+                    <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-900/20 blur-[120px]"></div>
+                    <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-900/10 blur-[120px]"></div>
+                </div>
+
+                {/* Top Navbar */}
+                <Navbar title={getPageTitle()} />
+
+                {/* Scrollable Page Content */}
+                <main className="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth">
+                    <div className="max-w-7xl mx-auto">
+                        <Outlet />
+                    </div>
+                </main>
             </div>
-            <button
-              onClick={logout}
-              className="px-4 py-2 text-sm font-medium text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 rounded-lg transition-colors border border-rose-500/20"
-            >
-              Logout
-            </button>
-          </div>
-        </header>
-        <main className="flex-1 overflow-auto p-6">
-          <Outlet />
-        </main>
-      </div>
-    </div>
-  );
-}
+        </div>
+    );
+};
+
+export default DashboardLayout;

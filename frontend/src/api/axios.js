@@ -2,6 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || "http://localhost:8081/api",
+    withCredentials: true
 });
 
 api.interceptors.request.use((config) => {
@@ -51,29 +52,17 @@ api.interceptors.response.use(
 
             originalRequest._retry = true;
             isRefreshing = true;
-            
-            const refreshToken = localStorage.getItem("refreshToken");
-            if (!refreshToken) {
-                isRefreshing = false;
-                // Force logout
-                localStorage.clear();
-                if (window.location.pathname !== "/") window.location.href = "/";
-                return Promise.reject(error);
-            }
 
             try {
                 // We use axios directly here to avoid interceptor loops
-                const rs = await axios.post((import.meta.env.VITE_API_URL || "http://localhost:8081/api") + "/auth/refresh", {
-                    refreshToken: refreshToken
-                });
+                const rs = await axios.post(
+                    (import.meta.env.VITE_API_URL || "http://localhost:8081/api") + "/auth/refresh",
+                    {},
+                    { withCredentials: true }
+                );
                 
                 const newAccessToken = rs.data.accessToken;
                 localStorage.setItem("token", newAccessToken);
-                
-                // If backend rotated the refresh token, save it
-                if (rs.data.refreshToken) {
-                    localStorage.setItem("refreshToken", rs.data.refreshToken);
-                }
 
                 api.defaults.headers.common['Authorization'] = 'Bearer ' + newAccessToken;
                 originalRequest.headers['Authorization'] = 'Bearer ' + newAccessToken;

@@ -5,7 +5,7 @@ services:
     image: mysql:8.4
     container_name: wms-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       MYSQL_DATABASE: wms
     ports:
       - "3307:3306"
@@ -21,8 +21,8 @@ services:
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:mysql://mysql:3306/wms}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-root}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-root}
-      JWT_SECRET: ${JWT_SECRET:-changethis_secret_key_immediately_in_production}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
     ports:
       - "8081:8081"

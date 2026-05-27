@@ -12,8 +12,13 @@ class WebSocketService {
             return;
         }
 
+        const token = localStorage.getItem('token');
+
         this.client = new Client({
             brokerURL: import.meta.env.VITE_WS_URL || 'ws://localhost:8081/ws',
+            connectHeaders: {
+                Authorization: token ? `Bearer ${token}` : '',
+            },
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
