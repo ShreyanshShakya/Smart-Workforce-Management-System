@@ -3,7 +3,9 @@ package com.wms.service;
 import com.wms.dto.AuthResponseDTO;
 import com.wms.dto.LoginRequestDTO;
 import com.wms.dto.RegisterRequestDTO;
+import com.wms.dto.RefreshTokenRequestDTO;
 import com.wms.dto.UserResponseDTO;
+import com.wms.entity.RefreshToken;
 import com.wms.entity.Role;
 import com.wms.entity.User;
 import com.wms.exception.ResourceAlreadyExistsException;
@@ -21,16 +23,19 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService
+            JwtService jwtService,
+            RefreshTokenService refreshTokenService
     ) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     public AuthResponseDTO login(LoginRequestDTO requestDTO) {
@@ -49,12 +54,27 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        String token = jwtService.generateToken(
+        String accessToken = jwtService.generateToken(
                 user.getEmail(),
                 user.getRole().name()
         );
 
-        return new AuthResponseDTO(token);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+
+        return new AuthResponseDTO(accessToken, refreshToken.getToken());
+    }
+
+    public AuthResponseDTO refreshToken(RefreshTokenRequestDTO requestDTO) {
+        String requestRefreshToken = requestDTO.getRefreshToken();
+
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String accessToken = jwtService.generateToken(user.getEmail(), user.getRole().name());
+                    return new AuthResponseDTO(accessToken, requestRefreshToken);
+                })
+                .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
     }
 
     public UserResponseDTO register(RegisterRequestDTO requestDTO) {

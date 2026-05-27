@@ -26,21 +26,17 @@ public class JwtService {
         );
     }
 
+    @Value("${jwt.expiration:900000}") // Default 15 minutes
+    private Long jwtExpirationMs;
+
     public String generateToken(String email, String role) {
 
         return Jwts.builder()
                 .subject(email)
-
                 .claim("role", role)
-
                 .issuedAt(new Date())
-
-                .expiration(
-                        new Date(System.currentTimeMillis() + 1000 * 60 * 60)
-                )
-
+                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-
                 .compact();
     }
 

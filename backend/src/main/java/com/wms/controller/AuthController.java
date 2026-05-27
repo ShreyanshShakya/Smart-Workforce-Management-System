@@ -3,8 +3,11 @@ package com.wms.controller;
 import com.wms.dto.AuthResponseDTO;
 import com.wms.dto.LoginRequestDTO;
 import com.wms.dto.RegisterRequestDTO;
+import com.wms.dto.RefreshTokenRequestDTO;
 import com.wms.dto.UserResponseDTO;
 import com.wms.service.AuthService;
+import com.wms.service.RefreshTokenService;
+import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +17,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final RefreshTokenService refreshTokenService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, RefreshTokenService refreshTokenService) {
         this.authService = authService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @PostMapping("/login")
@@ -33,5 +38,20 @@ public class AuthController {
             @Valid @RequestBody RegisterRequestDTO requestDTO
     ) {
         return authService.register(requestDTO);
+    }
+
+    @PostMapping("/refresh")
+    public AuthResponseDTO refresh(
+            @Valid @RequestBody RefreshTokenRequestDTO requestDTO
+    ) {
+        return authService.refreshToken(requestDTO);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(
+            @Valid @RequestBody RefreshTokenRequestDTO requestDTO
+    ) {
+        refreshTokenService.deleteByToken(requestDTO.getRefreshToken());
+        return ResponseEntity.ok("Logged out successfully");
     }
 }

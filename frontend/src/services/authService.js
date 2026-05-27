@@ -3,9 +3,10 @@ import { jwtDecode } from "jwt-decode";
 
 export const login = async (email, password) => {
     const response = await api.post("/auth/login", { email, password });
-    if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-        const decoded = jwtDecode(response.data.token);
+    if (response.data.accessToken) {
+        localStorage.setItem("token", response.data.accessToken);
+        localStorage.setItem("refreshToken", response.data.refreshToken);
+        const decoded = jwtDecode(response.data.accessToken);
         // Assuming role and sub(email) are in the token claims
         const userRole = decoded.role || "EMPLOYEE"; // Default/Fallback
         const userEmail = decoded.sub || email;
@@ -20,10 +21,22 @@ export const register = async (name, email, password) => {
     return response.data;
 };
 
-export const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("email");
+export const logout = async () => {
+    try {
+        const refreshToken = localStorage.getItem("refreshToken");
+        if (refreshToken) {
+            // Best effort to invalidate token on server
+            await api.post("/auth/logout", { refreshToken });
+        }
+    } catch (error) {
+        console.error("Failed to logout on server", error);
+    } finally {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("role");
+        localStorage.removeItem("email");
+        window.location.href = "/";
+    }
 };
 
 export const getCurrentUser = () => {
@@ -43,12 +56,17 @@ export const getCurrentUser = () => {
 
 export const isAuthenticated = () => {
     const token = localStorage.getItem("token");
-    if (!token) return false;
+    const refreshToken = localStorage.getItem("refreshToken");
+    
+    if (!token && !refreshToken) return false;
+
+    // If there's a refresh token, assume authenticated until the API says otherwise
+    if (refreshToken) return true;
 
     try {
         const decoded = jwtDecode(token);
-        // Check if token is expired
         if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+            // Only token exists and it's expired
             logout();
             return false;
         }
