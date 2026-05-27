@@ -5,8 +5,8 @@ import CreateTaskForm from '../components/CreateTaskForm';
 import TaskTable from '../components/TaskTable';
 import { getMyTasks, getAllTasks, getAnalytics, getMyAnalytics } from '../services/taskService';
 import webSocketService from '../services/websocketService';
-import TaskStatusPieChart from './charts/TaskStatusPieChart';
-import TaskTrendBarChart from './charts/TaskTrendBarChart';
+import TaskStatusPieChart from '../components/charts/TaskStatusPieChart';
+import TaskTrendBarChart from '../components/charts/TaskTrendBarChart';
 
 export default function DashboardPage() {
     const { user } = useAuth();
