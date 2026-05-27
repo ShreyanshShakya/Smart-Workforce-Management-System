@@ -111,6 +111,15 @@ public class SecurityConfig {
                          */
 
                         .requestMatchers(
+                                "/api/tasks/analytics/me"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "MANAGER",
+                                "EMPLOYEE"
+                        )
+
+                        .requestMatchers(
                                 "/api/tasks/status/**",
                                 "/api/tasks/priority/**",
                                 "/api/tasks/overdue"
