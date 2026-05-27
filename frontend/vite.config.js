@@ -10,11 +10,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          recharts: ['recharts'],
-          lucide: ['lucide-react'],
-          axios: ['axios']
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('recharts')) return 'recharts';
+            if (id.includes('lucide-react')) return 'lucide';
+            if (id.includes('axios')) return 'axios';
+            return 'vendor';
+          }
         }
       }
     }
