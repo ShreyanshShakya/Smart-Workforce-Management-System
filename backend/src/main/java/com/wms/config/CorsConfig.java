@@ -24,8 +24,12 @@ public class CorsConfig {
         CorsConfiguration configuration =
                 new CorsConfiguration();
 
-        configuration.setAllowedOrigins(
-                List.of(allowedOrigins.split(","))
+        configuration.setAllowedOriginPatterns(
+                List.of(
+                        "http://localhost:[*]",
+                        "https://*.vercel.app",
+                        "https://smart-workforce-management-system.vercel.app"
+                )
         );
 
         configuration.setAllowedMethods(
