@@ -38,6 +38,7 @@ public class RefreshTokenService {
 
         // Optionally, delete existing tokens for this user if you only want 1 active session
         refreshTokenRepository.deleteByUser(user);
+        refreshTokenRepository.flush();
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
