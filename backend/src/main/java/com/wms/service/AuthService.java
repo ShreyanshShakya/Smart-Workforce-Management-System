@@ -42,7 +42,7 @@ public class AuthService {
 
         User user = userRepository.findByEmail(requestDTO.getEmail())
                 .orElseThrow(() ->
-                        new RuntimeException("Invalid email or password")
+                        new org.springframework.security.authentication.BadCredentialsException("Invalid email or password")
                 );
 
         boolean passwordMatches = passwordEncoder.matches(
@@ -51,7 +51,7 @@ public class AuthService {
         );
 
         if (!passwordMatches) {
-            throw new RuntimeException("Invalid email or password");
+            throw new org.springframework.security.authentication.BadCredentialsException("Invalid email or password");
         }
 
         String accessToken = jwtService.generateToken(

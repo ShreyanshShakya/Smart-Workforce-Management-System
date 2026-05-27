@@ -46,11 +46,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleResourceAlreadyExistsException(ResourceAlreadyExistsException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Conflict");
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, String>> handleAuthenticationException(AuthenticationException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", "Unauthorized");
-        response.put("message", "Authentication failed. Please login again.");
+        response.put("message", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
