@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import AnalyticsCards from '../components/AnalyticsCards';
 import CreateTaskForm from '../components/CreateTaskForm';
 import TaskTable from '../components/TaskTable';
-import { getMyTasks, getAllTasks, getAnalytics, getMyAnalytics, createTask } from '../services/taskService';
+import { getMyTasks, getAllTasks, getAnalytics, getMyAnalytics, createTask, updateTaskStatus } from '../services/taskService';
 import { getAllUsers } from '../services/userService';
 import webSocketService from '../services/websocketService';
 import TaskStatusPieChart from '../components/charts/TaskStatusPieChart';
@@ -71,6 +71,16 @@ export default function DashboardPage() {
         }
     };
 
+    const handleStatusChange = async (taskId, newStatus) => {
+        try {
+            await updateTaskStatus(taskId, newStatus);
+            fetchTasks();
+        } catch (err) {
+            console.error("Failed to update status:", err);
+            alert("Failed to update status.");
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -121,7 +131,7 @@ export default function DashboardPage() {
                             </svg>
                         </div>
                     ) : (
-                        <TaskTable tasks={tasks} onTaskUpdated={fetchTasks} />
+                        <TaskTable tasks={tasks} onStatusChange={handleStatusChange} onTaskUpdated={fetchTasks} />
                     )}
                 </div>
             </div>

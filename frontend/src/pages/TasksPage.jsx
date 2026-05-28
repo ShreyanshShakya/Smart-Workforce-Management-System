@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import TaskTable from '../components/TaskTable';
-import { getAllTasks } from '../services/taskService';
+import { getAllTasks, updateTaskStatus } from '../services/taskService';
 import { useAuth } from '../context/AuthContext';
 import webSocketService from '../services/websocketService';
 import Pagination from '../components/Pagination';
@@ -27,6 +27,16 @@ export default function TasksPage() {
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleStatusChange = async (taskId, newStatus) => {
+        try {
+            await updateTaskStatus(taskId, newStatus);
+            fetchTasks();
+        } catch (err) {
+            console.error("Failed to update status:", err);
+            alert("Failed to update status.");
         }
     };
 
@@ -107,7 +117,7 @@ export default function TasksPage() {
                             </svg>
                         </div>
                     ) : (
-                        <TaskTable tasks={tasks} onTaskUpdated={fetchTasks} />
+                        <TaskTable tasks={tasks} onStatusChange={handleStatusChange} onTaskUpdated={fetchTasks} />
                     )}
                 </div>
 
