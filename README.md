@@ -4,7 +4,7 @@
 
 A full-stack, enterprise-grade Workforce Management System designed to streamline task delegation, track employee progress, and analyze team performance in real-time.
 
-Built with a robust **Spring Boot** backend and a beautiful, modern **React (Vite)** frontend, this application features Role-Based Access Control (RBAC), secure JWT authentication, and real-time WebSockets.
+Built with a robust **Spring Boot** backend and a beautiful, modern **React (Vite)** frontend, this application features Role-Based Access Control (RBAC), secure JWT authentication with refresh tokens, and real-time WebSockets.
 
 ---
 
@@ -12,20 +12,11 @@ Built with a robust **Spring Boot** backend and a beautiful, modern **React (Vit
 
 - **Role-Based Access Control (RBAC)**: Secure access tailored for `ADMIN`, `MANAGER`, and `EMPLOYEE` roles.
 - **Real-Time Updates**: Tasks update live across all connected clients via STOMP WebSockets—no page refresh required.
+- **Dashboard Analytics**: Live statistics and charts (built with Recharts) showing task completion rates, trends, and overdue metrics.
 - **Task Management Lifecycle**: Create, assign, prioritize, and track the status of tasks (Pending, In Progress, Completed).
-- **Secure Authentication**: End-to-end security using JWT (JSON Web Tokens) with a hardened public registration flow.
-- **Modern UI/UX**: A dark-themed, glassmorphism design built with Tailwind CSS v4 for an ultra-premium feel.
-- **DevOps Ready**: Fully containerized with Docker, multi-stage builds, and Nginx reverse proxy.
-
----
-
-## 📸 Screenshots
-
-*(Replace these placeholders with actual screenshots of your running application)*
-
-| Dashboard (Dark Mode) | Task Management |
-| :---: | :---: |
-| ![Dashboard Placeholder](https://via.placeholder.com/600x400/0f172a/cbd5e1?text=Dashboard+Screenshot) | ![Tasks Placeholder](https://via.placeholder.com/600x400/0f172a/cbd5e1?text=Task+Table+Screenshot) |
+- **Secure Authentication**: End-to-end security using rotating JWT Access Tokens and persistent Refresh Tokens stored in MySQL.
+- **Modern UI/UX**: A beautiful dark-themed, glassmorphism design built with Tailwind CSS v4 for an ultra-premium feel.
+- **DevOps Ready**: Fully containerized with Docker, multi-stage builds, and Nginx reverse proxy. Easily deployable to Vercel, Render, and Aiven.
 
 ---
 
@@ -67,9 +58,10 @@ graph TD
 ### Frontend
 - **React 18** (Vite)
 - **Tailwind CSS v4** (Utility-first styling, Glassmorphism)
+- **Recharts** (Data visualization & analytics)
 - **React Router v6** (Protected routing)
-- **Axios** (API Client)
-- **STOMP.js** (WebSockets)
+- **Axios** (API Client with response interceptors)
+- **STOMP.js & SockJS** (WebSockets)
 
 ### Backend
 - **Java 17** & **Spring Boot 3**
@@ -78,33 +70,11 @@ graph TD
 - **Spring WebSockets** (Real-time broadcasting)
 - **MySQL 8.4** (Database)
 
-### DevOps
-- **Docker & Docker Compose**
-- **Nginx** (Frontend Web Server & Reverse Proxy)
-- **Multi-Stage Builds** (Zero-dependency builds)
-
----
-
-## 🐳 Quick Start (Local Deployment)
-
-The easiest way to run the entire application is using Docker. You do **not** need Java or Node.js installed on your machine—just Docker!
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ShreyanshShakya/Smart-Workforce-Management-System.git
-   cd Smart-Workforce-Management-System
-   ```
-
-2. **Spin up the stack**
-   ```bash
-   docker-compose up --build -d
-   ```
-
-3. **Access the Application**
-   - Frontend UI: [http://localhost](http://localhost)
-   - Backend API: [http://localhost:8081/api](http://localhost:8081/api)
-
-*Note: The MySQL database will automatically initialize. You can register a new account on the frontend to get started.*
+### DevOps & Cloud
+- **Docker & Docker Compose** (Local development)
+- **Vercel** (Frontend Hosting)
+- **Render** (Backend Hosting)
+- **Aiven** (Managed MySQL Database)
 
 ---
 
@@ -112,26 +82,28 @@ The easiest way to run the entire application is using Docker. You do **not** ne
 
 This repository is configured to easily deploy to free PaaS providers for a live showcase.
 
-### 1. Backend (Render / Railway)
-- Connect your GitHub repo to a free Render Web Service.
-- Set the Root Directory to `backend`.
-- Add environment variables:
-  - `SPRING_DATASOURCE_URL`, `USERNAME`, `PASSWORD` (Point to a free MySQL provider like Aiven).
-  - `ALLOWED_ORIGINS`: `https://your-frontend.vercel.app`
+### 1. Database (Aiven)
+- Create a free MySQL 8 database on Aiven.
+- Obtain the Service URI.
 
-### 2. Frontend (Vercel)
-- Import the repository into Vercel and set the Root Directory to `frontend`.
+### 2. Backend (Render / Railway)
+- Connect your GitHub repo to a free Render Web Service.
+- Set the Root Directory to `backend` or deploy from root with Docker.
+- Add environment variables:
+  - `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` (Point to Aiven).
+  - `ALLOWED_ORIGINS`: `https://your-frontend.vercel.app` (for CORS).
+
+### 3. Frontend (Vercel)
+- Import the repository into Vercel and set the Root Directory to `wms-frontend`.
 - Add environment variables:
   - `VITE_API_URL`: `https://your-backend.onrender.com/api`
   - `VITE_WS_URL`: `wss://your-backend.onrender.com/ws`
 
 ---
 
-## 🔐 Security Architecture
-
-- **Stateless Sessions**: Uses Bearer Tokens (JWT) meaning the backend scales horizontally with ease.
-- **Endpoint Protection**: `/api/users` is locked to `ADMIN` only to prevent privilege escalation.
-- **CORS Handling**: Configurable `ALLOWED_ORIGINS` dynamically blocks unauthorized cross-origin requests.
+## 🔑 Admin Access Shortcut
+By default, all new users register as `EMPLOYEE`. However, there is a built-in shortcut for easy testing:
+**If you register a new account with an email that starts with the word `admin` (e.g., `admin@test.com`), the system will automatically grant you full `ADMIN` privileges.**
 
 ---
 
