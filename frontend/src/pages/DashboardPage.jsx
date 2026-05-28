@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import AnalyticsCards from '../components/AnalyticsCards';
 import CreateTaskForm from '../components/CreateTaskForm';
 import TaskTable from '../components/TaskTable';
-import { getMyTasks, getAllTasks, getAnalytics, getMyAnalytics } from '../services/taskService';
+import { getMyTasks, getAllTasks, getAnalytics, getMyAnalytics, createTask } from '../services/taskService';
+import { getAllUsers } from '../services/userService';
 import webSocketService from '../services/websocketService';
 import TaskStatusPieChart from '../components/charts/TaskStatusPieChart';
 import TaskTrendBarChart from '../components/charts/TaskTrendBarChart';
@@ -11,6 +12,7 @@ import TaskTrendBarChart from '../components/charts/TaskTrendBarChart';
 export default function DashboardPage() {
     const { user } = useAuth();
     const [tasks, setTasks] = useState([]);
+    const [users, setUsers] = useState([]);
     const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showCreateForm, setShowCreateForm] = useState(false);
@@ -26,6 +28,8 @@ export default function DashboardPage() {
                 setTasks(res.content || []);
                 const stats = await getAnalytics();
                 setAnalytics(stats);
+                const fetchedUsers = await getAllUsers();
+                setUsers(fetchedUsers || []);
             } else {
                 const res = await getMyTasks();
                 setTasks(res || []);
@@ -33,7 +37,7 @@ export default function DashboardPage() {
                 setAnalytics(stats);
             }
         } catch (error) {
-            console.error("Failed to fetch tasks:", error);
+            console.error("Failed to fetch tasks/users:", error);
         } finally {
             setLoading(false);
         }
@@ -54,11 +58,17 @@ export default function DashboardPage() {
         return () => {
             webSocketService.unsubscribe('/topic/tasks');
         };
-    }, [isAdminOrManager, user?.email]);
+    }, [isAdminOrManager, user?.email, fetchTasks]);
 
-    const handleTaskCreated = () => {
-        setShowCreateForm(false);
-        fetchTasks();
+    const handleCreateTask = async (taskData) => {
+        try {
+            await createTask(taskData);
+            setShowCreateForm(false);
+            fetchTasks();
+        } catch (error) {
+            console.error("Failed to create task:", error);
+            alert("Failed to create task. Please try again.");
+        }
     };
 
     return (
@@ -88,7 +98,11 @@ export default function DashboardPage() {
             {showCreateForm && isAdminOrManager && (
                 <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-6 shadow-xl">
                     <h2 className="text-lg font-semibold text-white mb-4">Create New Task</h2>
-                    <CreateTaskForm onTaskCreated={handleTaskCreated} />
+                    <CreateTaskForm 
+                        users={users} 
+                        onSubmit={handleCreateTask} 
+                        onCancel={() => setShowCreateForm(false)} 
+                    />
                 </div>
             )}
 
