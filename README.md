@@ -101,10 +101,5 @@ This repository is configured to easily deploy to free PaaS providers for a live
 
 ---
 
-## 🔑 Admin Access Shortcut
-By default, all new users register as `EMPLOYEE`. However, there is a built-in shortcut for easy testing:
-**If you register a new account with an email that starts with the word `admin` (e.g., `admin@test.com`), the system will automatically grant you full `ADMIN` privileges.**
-
----
 
 *Developed by Shreyansh Shakya*
